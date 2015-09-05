@@ -11,6 +11,7 @@ import io.getquill.ast.Query
 import io.getquill.ast.SortBy
 import io.getquill.ast.StatefulTransformer
 import io.getquill.ast.Reverse
+import io.getquill.ast.Take
 
 case class State(seen: Set[Ident], free: Set[Ident])
 
@@ -38,6 +39,10 @@ case class FreeVariables(state: State)
       case Reverse(a) =>
         val (ar, art) = apply(a)
         (Reverse(ar), art)
+      case Take(a, b) =>
+        val (ar, art) = apply(a)
+        val (br, brt) = apply(b)
+        (Take(ar, br), FreeVariables(State(state.seen, state.free ++ art.state.free ++ brt.state.free)))
     }
 
   private def apply(q: Query, a: Ast, b: Ident, c: Ast): (Query, StatefulTransformer[State]) = {

@@ -8,6 +8,7 @@ import io.getquill.ast.Map
 import io.getquill.ast.Query
 import io.getquill.ast.SortBy
 import io.getquill.ast.Reverse
+import io.getquill.ast.Take
 
 case class ReduceNestedStructures(apply: Ast => Ast) {
 
@@ -38,6 +39,11 @@ case class ReduceNestedStructures(apply: Ast => Ast) {
         apply(a) match {
           case `a` => None
           case a   => Some(Reverse(a))
+        }
+      case Take(a, b) =>
+        (apply(a), apply(b)) match {
+          case (`a`, `b`) => None
+          case (a, b)     => Some(Take(a, b))
         }
     }
 }

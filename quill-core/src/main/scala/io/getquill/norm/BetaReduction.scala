@@ -14,6 +14,7 @@ import io.getquill.ast.SortBy
 import io.getquill.ast.Tuple
 import io.getquill.ast.Reverse
 import io.getquill.ast.StatelessTransformer
+import io.getquill.ast.Take
 
 case class BetaReduction(map: collection.Map[Ident, Ast])
     extends StatelessTransformer {
@@ -45,6 +46,8 @@ case class BetaReduction(map: collection.Map[Ident, Ast])
         SortBy(apply(a), b, BetaReduction(map - b)(c))
       case Reverse(a) =>
         Reverse(apply(a))
+      case Take(a, b) =>
+        Take(apply(a), apply(b))
     }
 }
 
