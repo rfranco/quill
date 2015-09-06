@@ -9,6 +9,7 @@ import io.getquill.ast.Query
 import io.getquill.ast.SortBy
 import io.getquill.ast.StatefulTransformer
 import io.getquill.norm.BetaReduction
+import io.getquill.ast.Take
 
 private case class AvoidAliasConflict(state: Set[Ident])
     extends StatefulTransformer[Set[Ident]] {
@@ -55,6 +56,10 @@ private case class AvoidAliasConflict(state: Set[Ident])
       case SortBy(q: Entity, x, p) =>
         val (pr, t) = AvoidAliasConflict(state + x)(p)
         (SortBy(q, x, pr), t)
+
+      case Take(q, n) =>
+        val (qr, t) = AvoidAliasConflict(Set[Ident]())(q)
+        (Take(qr, n), this)
 
       case other => super.apply(other)
     }

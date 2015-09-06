@@ -10,12 +10,17 @@ import io.getquill.ast.Query
 import io.getquill.ast.SortBy
 import io.getquill.util.Messages.fail
 import io.getquill.ast.Reverse
+import io.getquill.ast.Take
+import io.getquill.ast.Take
 
 private[select] object ExtractSelect {
 
   def apply(query: Query): (Query, Ast) =
     query match {
       case t: Entity =>
+        val x = Ident("x")
+        (Map(t, x, x), x)
+      case t: Take =>
         val x = Ident("x")
         (Map(t, x, x), x)
       case Map(q, x, p) =>

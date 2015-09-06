@@ -17,7 +17,7 @@ class SqlQuerySpec extends Spec {
         }
       }
       val sqlq = SqlQuery(q.ast)
-      sqlq.from mustEqual List(Source("TestEntity", "a"), Source("TestEntity2", "b"))
+      sqlq.from mustEqual List(TableSource("TestEntity", "a"), TableSource("TestEntity2", "b"))
       sqlq.where.toString mustEqual "Some((a.s != null) && (b.i > a.i))"
       sqlq.select.toString mustEqual "(a, b)"
       sqlq.orderBy mustEqual List()
@@ -28,7 +28,7 @@ class SqlQuerySpec extends Spec {
           qr1.sortBy(t => t.s).map(t => t.s)
         }
         val sqlq = SqlQuery(q.ast)
-        sqlq.from mustEqual List(Source("TestEntity", "t"))
+        sqlq.from mustEqual List(TableSource("TestEntity", "t"))
         sqlq.where mustEqual None
         sqlq.select.toString mustEqual "t.s"
         sqlq.orderBy.toString mustEqual "List(OrderByCriteria(t.s,false))"
@@ -38,7 +38,7 @@ class SqlQuerySpec extends Spec {
           qr1.filter(t => t.s == "s").sortBy(t => t.s).map(t => (t.i))
         }
         val sqlq = SqlQuery(q.ast)
-        sqlq.from mustEqual List(Source("TestEntity", "t"))
+        sqlq.from mustEqual List(TableSource("TestEntity", "t"))
         sqlq.where.toString mustEqual """Some(t.s == "s")"""
         sqlq.select.toString mustEqual "t.i"
         sqlq.orderBy.toString mustEqual "List(OrderByCriteria(t.s,false))"
@@ -48,7 +48,7 @@ class SqlQuerySpec extends Spec {
           qr1.sortBy(t => t.s).reverse.map(t => t.s)
         }
         val sqlq = SqlQuery(q.ast)
-        sqlq.from mustEqual List(Source("TestEntity", "t"))
+        sqlq.from mustEqual List(TableSource("TestEntity", "t"))
         sqlq.where mustEqual None
         sqlq.select.toString mustEqual "t.s"
         sqlq.orderBy.toString mustEqual "List(OrderByCriteria(t.s,true))"
@@ -58,7 +58,7 @@ class SqlQuerySpec extends Spec {
           qr1.sortBy(t => (t.s, t.i)).map(t => t.s)
         }
         val sqlq = SqlQuery(q.ast)
-        sqlq.from mustEqual List(Source("TestEntity", "t"))
+        sqlq.from mustEqual List(TableSource("TestEntity", "t"))
         sqlq.where mustEqual None
         sqlq.select.toString mustEqual "t.s"
         sqlq.orderBy.toString mustEqual "List(OrderByCriteria(t.s,false), OrderByCriteria(t.i,false))"
@@ -68,7 +68,7 @@ class SqlQuerySpec extends Spec {
           qr1.sortBy(t => (t.s, t.i)).reverse.sortBy(t => t.l).map(t => t.s)
         }
         val sqlq = SqlQuery(q.ast)
-        sqlq.from mustEqual List(Source("TestEntity", "t"))
+        sqlq.from mustEqual List(TableSource("TestEntity", "t"))
         sqlq.where mustEqual None
         sqlq.select.toString mustEqual "t.s"
         sqlq.orderBy.toString mustEqual "List(OrderByCriteria(t.s,true), OrderByCriteria(t.i,true), OrderByCriteria(t.l,false))"

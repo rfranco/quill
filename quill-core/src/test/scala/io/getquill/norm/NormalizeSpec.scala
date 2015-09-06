@@ -1,6 +1,6 @@
 package io.getquill.norm
 
-import io.getquill.Spec
+import io.getquill._
 
 class NormalizeSpec extends Spec {
 
@@ -11,7 +11,6 @@ class NormalizeSpec extends Spec {
         val query = gen(i)
         s"$i levels ($j) - $query" in {
           val n = Normalize(query)
-          println("AAA " + n)
           val q = VerifyNormalization(n)
         }
       }

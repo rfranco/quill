@@ -10,7 +10,7 @@ import io.getquill.ast.Constant
 import io.getquill.ast.Delete
 import io.getquill.ast.Entity
 import io.getquill.ast.Filter
-import io.getquill.ast.Ident
+import io.getquill.ast._
 import io.getquill.ast.Insert
 import io.getquill.ast.NullValue
 import io.getquill.ast.Property
@@ -55,9 +55,14 @@ trait SqlIdiom {
           case None        => selectFrom
           case Some(where) => selectFrom + s" WHERE ${where.show}"
         }
-      e.orderBy match {
-        case Nil     => where
-        case orderBy => where + showOrderBy(orderBy)
+      val orderBy =
+        e.orderBy match {
+          case Nil     => where
+          case orderBy => where + showOrderBy(orderBy)
+        }
+      e.limit match {
+        case None        => orderBy
+        case Some(limit) => s"$orderBy LIMIT ${limit.show}"
       }
     }
   }
@@ -67,7 +72,10 @@ trait SqlIdiom {
 
   implicit val sourceShow: Show[Source] = new Show[Source] {
     def show(source: Source) =
-      s"${source.table} ${source.alias}"
+      source match {
+        case TableSource(table, alias) => s"$table $alias"
+        case QuerySource(q, alias)     => s"(${q.show}) $alias"
+      }
   }
 
   implicit val orderByCriteriaShow: Show[OrderByCriteria] = new Show[OrderByCriteria] {

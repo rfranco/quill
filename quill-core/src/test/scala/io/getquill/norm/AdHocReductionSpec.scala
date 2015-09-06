@@ -26,6 +26,16 @@ class AdHocReductionSpec extends Spec {
     AdHocReduction(q.ast) mustEqual n.ast
   }
 
+  "a.map(b => c).take(d)" in {
+    val q = quote {
+      qr1.map(t => t.s).take(1)
+    }
+    val n = quote {
+      qr1.take(1).map(t => t.s)
+    }
+    AdHocReduction(q.ast) mustEqual n.ast
+  }
+
   "reverse" - {
     "a.reverse.reverse" in {
       val q = quote {
