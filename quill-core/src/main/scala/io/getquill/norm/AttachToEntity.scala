@@ -9,6 +9,7 @@ import io.getquill.ast.Map
 import io.getquill.ast.Query
 import io.getquill.ast.SortBy
 import io.getquill.ast.Reverse
+import io.getquill.ast.Take
 
 object AttachToEntity {
 
@@ -25,6 +26,7 @@ object AttachToEntity {
       case Filter(a: Query, b, c)   => Filter(apply(f)(a), b, c)
       case SortBy(a: Query, b, c)   => SortBy(apply(f)(a), b, c)
       case Reverse(a: Query)        => Reverse(apply(f)(a))
+      case Take(a: Query, n)        => Take(apply(f)(a), n)
 
       case e: Entity                => f(e, Ident("x"))
 

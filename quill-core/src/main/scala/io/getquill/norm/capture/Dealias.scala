@@ -1,53 +1,56 @@
 package io.getquill.norm.capture
 
-import io.getquill.ast.Filter
-import io.getquill.ast.FlatMap
-import io.getquill.ast.Map
-import io.getquill.ast.Query
-import io.getquill.ast.SortBy
-import io.getquill.ast.StatelessTransformer
+import io.getquill.ast.Ident
+import io.getquill.ast._
+import io.getquill.ast.StatefulTransformer
 import io.getquill.norm.BetaReduction
 
-private[capture] object Dealias extends StatelessTransformer {
+private[capture] case class Dealias(state: Option[Ident]) extends StatefulTransformer[Option[Ident]] {
 
-  override def apply(e: Query): Query =
-    e match {
+  override def apply(q: Query): (Query, StatefulTransformer[Option[Ident]]) =
+    q match {
+      case Map(a, b, c) =>
+        apply(a) match {
+          case (an, t @ Dealias(Some(alias))) =>
+            (Map(an, alias, BetaReduction(c, b -> alias)), t)
+          case other =>
+            (q, Dealias(Some(b)))
+        }
+      case FlatMap(a, b, c) =>
+        apply(a) match {
+          case (an, t @ Dealias(Some(alias))) =>
+            (FlatMap(an, alias, BetaReduction(c, b -> alias)), t)
+          case other =>
+            (q, Dealias(Some(b)))
+        }
+      case Filter(a, b, c) =>
+        apply(a) match {
+          case (an, t @ Dealias(Some(alias))) =>
+            (Filter(an, alias, BetaReduction(c, b -> alias)), t)
+          case other =>
+            (q, Dealias(Some(b)))
+        }
+      case SortBy(a, b, c) =>
+        apply(a) match {
+          case (an, t @ Dealias(Some(alias))) =>
+            (SortBy(an, alias, BetaReduction(c, b -> alias)), t)
+          case other =>
+            (q, Dealias(Some(b)))
+        }
+      case Take(a, n) =>
+        val (an, ant) = apply(a)
+        (Take(an, n), ant)
+      case Reverse(a) =>
+        val (an, ant) = apply(a)
+        (Reverse(an), ant)
+      case q: Entity =>
+        (q, Dealias(None))
+    }
+}
 
-      // filter
-      case FlatMap(Filter(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        FlatMap(apply(Filter(q, x, p)), x, apply(rr))
-
-      case Filter(Filter(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        Filter(apply(Filter(q, x, p)), x, rr)
-
-      case Map(Filter(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        Map(apply(Filter(q, x, p)), x, rr)
-
-      case SortBy(Filter(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        SortBy(apply(Filter(q, x, p)), x, rr)
-
-      // sortBy
-
-      case FlatMap(SortBy(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        FlatMap(apply(SortBy(q, x, p)), x, apply(rr))
-
-      case Filter(SortBy(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        Filter(apply(SortBy(q, x, p)), x, rr)
-
-      case Map(SortBy(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        Map(apply(SortBy(q, x, p)), x, rr)
-
-      case SortBy(SortBy(q, x, p), y, r) if (x != y) =>
-        val rr = BetaReduction(r, y -> x)
-        SortBy(apply(SortBy(q, x, p)), x, rr)
-
-      case other => super.apply(other)
+object Dealias {
+  def apply(query: Query) =
+    new Dealias(None)(query) match {
+      case (q, _) => q
     }
 }

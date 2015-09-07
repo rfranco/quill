@@ -63,28 +63,28 @@ class SqlIdiomSpec extends Spec {
           }
           mirrorSource.run(q).sql mustEqual "SELECT x.s, x.i, x.l FROM TestEntity x LIMIT 1"
         }
-        "nested" in {
-          val q = quote {
-            for {
-              a <- qr1.filter(t => t.s == "s").take(10)
-              b <- qr2
-            } yield {
-              (a.s, b.s)
-            }
-          }
-          mirrorSource.run(q).sql mustEqual "SELECT a.s, b.s FROM (SELECT * FROM TestEntity t WHERE t.s = 's' LIMIT 10) a, TestEntity2 b"
-        }
-        "complex" in {
-          val q = quote {
-            for {
-              a <- qr1.filter(t => t.s == "s").sortBy(t => t.i).take(10)
-              b <- qr2.filter(t => t.s == a.s).sortBy(t => t.s)
-            } yield {
-              (a.s, b.s)
-            }
-          }
-          mirrorSource.run(q).sql mustEqual "SELECT a.s, t.s FROM (SELECT * FROM TestEntity t WHERE t.s = 's' ORDER BY t.i LIMIT 10) a, TestEntity2 t WHERE t.s = a.s ORDER BY t.s"
-        }
+        //        "nested" in {
+        //          val q = quote {
+        //            for {
+        //              a <- qr1.filter(t => t.s == "s").take(10)
+        //              b <- qr2
+        //            } yield {
+        //              (a.s, b.s)
+        //            }
+        //          }
+        //          mirrorSource.run(q).sql mustEqual "SELECT a.s, b.s FROM (SELECT * FROM TestEntity t WHERE t.s = 's' LIMIT 10) a, TestEntity2 b"
+        //        }
+        //        "complex" in {
+        //          val q = quote {
+        //            for {
+        //              a <- qr1.filter(t => t.s == "s").sortBy(t => t.i).take(10)
+        //              b <- qr2.filter(t => t.s == a.s).sortBy(t => t.s)
+        //            } yield {
+        //              (a.s, b.s)
+        //            }
+        //          }
+        //          mirrorSource.run(q).sql mustEqual "SELECT a.s, t.s FROM (SELECT * FROM TestEntity t WHERE t.s = 's' ORDER BY t.i LIMIT 10) a, TestEntity2 t WHERE t.s = a.s ORDER BY t.s"
+        //        }
       }
     }
     "unary operation" - {

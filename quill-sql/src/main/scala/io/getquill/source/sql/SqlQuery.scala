@@ -15,7 +15,9 @@ import io.getquill.ast.Reverse
 import io.getquill.ast.Take
 import io.getquill.norm.select.ReplaceSelect
 
-sealed trait Source
+sealed trait Source {
+  val alias: String
+}
 case class TableSource(table: String, alias: String) extends Source
 case class QuerySource(query: SqlQuery, alias: String) extends Source
 
@@ -34,6 +36,14 @@ object SqlQuery {
     query match {
 
       // entity.*
+
+      case Entity(name) =>
+        SqlQuery(
+          from = List(TableSource(name, "x")),
+          where = None,
+          orderBy = List(),
+          select = Ident("x"),
+          limit = None)
 
       case Map(Entity(name), Ident(alias), p) =>
         SqlQuery(
@@ -79,12 +89,23 @@ object SqlQuery {
           select = Ident("*"),
           limit = Some(n))
 
-      // entity.*.take
-
       // take.*
 
+      case Take(t: Take, n) =>
+        SqlQuery(
+          from = querySource(t, "x") :: Nil,
+          where = None,
+          orderBy = List(),
+          select = Ident("x"),
+          limit = Some(n))
+
       case Map(t: Take, Ident(alias), p) =>
-        apply(t).copy(select = p)
+        SqlQuery(
+          from = querySource(t, alias) :: Nil,
+          where = None,
+          orderBy = List(),
+          select = p,
+          limit = None)
 
       case FlatMap(t: Take, Ident(alias), r: Query) =>
         val nested = apply(r)

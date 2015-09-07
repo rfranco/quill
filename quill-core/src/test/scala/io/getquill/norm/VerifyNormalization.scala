@@ -9,6 +9,7 @@ import io.getquill.ast.SortBy
 import io.getquill.ast.StatelessTransformer
 import io.getquill.util.Messages.fail
 import io.getquill.ast.Reverse
+import io.getquill.ast.Take
 
 object VerifyNormalization extends StatelessTransformer {
 
@@ -16,6 +17,12 @@ object VerifyNormalization extends StatelessTransformer {
 
   private def finalFlatMapBody(q: Query): Query =
     q match {
+      case FlatMap(Take(a, n), b, c: FlatMap) =>
+        apply(a)
+        finalFlatMapBody(c)
+      case FlatMap(Take(a, n), b, c: Query) =>
+        apply(a)
+        verifyFinalFlatMapBody(c)
       case FlatMap(a: Entity, b, c: FlatMap) => finalFlatMapBody(c)
       case FlatMap(a: Entity, b, c: Query)   => verifyFinalFlatMapBody(c)
       case other                             => verifyFinalFlatMapBody(q)
@@ -36,9 +43,9 @@ object VerifyNormalization extends StatelessTransformer {
 
   private def verifyFilterClause(q: Query): Query =
     q match {
-      case q: Filter => q
-      case q: Entity => q
-      case other     => fail(s"Expected 'Filter' or 'Entity', but got $q")
+      case q: Filter         => q
+      case q: Entity         => q
+      case Take(a: Query, n) => apply(a)
+      case other             => fail(s"Expected 'Filter' or 'Entity', but got $q")
     }
-
 }

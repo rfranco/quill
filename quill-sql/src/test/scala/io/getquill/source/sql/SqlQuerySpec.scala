@@ -3,10 +3,43 @@ package io.getquill.source.sql
 import io.getquill.Spec
 import io.getquill.quote
 import io.getquill.unquote
+import io.getquill.norm.QueryGenerator
+import io.getquill.norm.Normalize
+import io.getquill.quotation.FreeVariables
+import io.getquill.ast.Ident
+import io.getquill.ast.Ast
 
 class SqlQuerySpec extends Spec {
 
-  "transforms the ast into a flatten sql-like structure" - {
+//  "transforms the ast into a flatten sql-like structure" - {
+//    "random-generated query" - {
+//      val gen = new QueryGenerator(1)
+//      for (i <- (5 to 20)) {
+//        for (j <- (0 until 30)) {
+//          val query = Normalize(gen(i))
+//          if (i == 6 && j == 17) {
+//            s"$i levels ($j) - $query" in {
+//              println(SqlQuery(query))
+//              verifyQuery(SqlQuery(query))
+//
+//              def verifyQuery(sqlq: SqlQuery): Unit = {
+//                val aliases = sqlq.from.map(_.alias).map(Ident(_)) :+ Ident("*")
+//                def verifyFreeVars(ast: Ast) =
+//                  (FreeVariables(ast) -- aliases) mustEqual Set()
+//                sqlq.from.collect {
+//                  case QuerySource(sqlq, _) => verifyQuery(sqlq)
+//                }
+//                sqlq.where.map(verifyFreeVars)
+//                sqlq.orderBy.map(_.property).map(verifyFreeVars)
+//                sqlq.limit.map(verifyFreeVars)
+//                verifyFreeVars(sqlq.select)
+//              }
+//            }
+//          }
+//        }
+//      }
+//    }
+
     "non-sorted query" in {
       val q = quote {
         for {

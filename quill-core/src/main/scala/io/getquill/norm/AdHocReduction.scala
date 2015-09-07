@@ -11,13 +11,14 @@ import io.getquill.ast.StatelessTransformer
 import io.getquill.ast.Tuple
 import io.getquill.ast.Reverse
 import io.getquill.ast.Take
+import io.getquill.norm.capture.AvoidCapture
 
 private[norm] object AdHocReduction extends StatelessTransformer {
 
   private val reduceNestedStructures = ReduceNestedStructures(apply)
 
   override def apply(q: Query): Query =
-    q match {
+    AvoidCapture(q) match {
 
       case `reduceNestedStructures`(query) =>
         apply(query)
